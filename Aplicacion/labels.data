@@ -1,0 +1,28 @@
+EVENT_TYPE
+0    1000    Eventos trozos de codigo
+VALUES
+0   End
+1   LoopGetBoundary
+2   FilteredRegion
+3   LoopAnalysis
+4   Loop1regionWavelet
+5   GetPeriodResults
+6   Totaltime
+7   NThreads
+8   Correction
+9   DoCutter3
+10   LoopCounterPfound
+11   Loopbuffer
+12   qsortDurRunning
+13   qsortRunning
+
+EVENT_TYPE
+0    1001    Eventos trace2trace
+VALUES
+0   End
+1   LoopProcessingTraceRecords
+2   SwitchState
+3   SwitchEvent
+4   SwitchCommunication
+5   SwitchGlobalCommunication
+6   SwitchDefault
