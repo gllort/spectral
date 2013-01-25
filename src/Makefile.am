@@ -1,4 +1,6 @@
 
+include_HEADERS = spectral-api.h
+
 lib_LTLIBRARIES = libspectral.la
 
 libspectral_la_SOURCES = \
