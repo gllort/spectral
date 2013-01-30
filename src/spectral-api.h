@@ -1,6 +1,8 @@
 #ifndef __SPECTRAL_API_H__
 #define __SPECTRAL_API_H__
 
+#include <stdlib.h>
+
 #define SIGNAL_CHUNK 1000
 
 typedef long long int spectral_time_t;
