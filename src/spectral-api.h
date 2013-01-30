@@ -3,6 +3,10 @@
 
 #include <stdlib.h>
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #define SIGNAL_CHUNK 1000
 
 typedef long long int spectral_time_t;
@@ -122,6 +126,10 @@ enum
 void applyWindowing(signal_t *signal, int windowing_type);
 
 int Spectral_ExecuteAnalysis(signal_t *orig_signal, int target_iters, int windowing_type, Period_t ***DetectedPeriods);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #endif /* __SPECTRAL_API_H__ */
 

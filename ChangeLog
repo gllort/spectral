@@ -1,5 +1,6 @@
 
  [ + added, - removed, * changed ]
+ * (30/Jan/2013) Added extern "C" directives in spectral-api.h to be used from C++
  * (30/Jan/2013) Header spectral-api.h was missing an include for stdlib.h
  * (25/Jan/2013) Distributable include files are now installed
  + (24/Jan/2013) Initial import 
