@@ -100,7 +100,7 @@ spectral_time_t Spectral_ShiftSignal(signal_t *signal);
 
 signal_t * Spectral_ChopSignal (signal_t *signal, spectral_time_t t1, spectral_time_t t2);
 
-void Spectral_SerializeSignal (signal_t *signal, spectral_time_t **times_out, spectral_delta_t **deltas_out, spectral_value_t **values_out);
+int Spectral_SerializeSignal (signal_t *signal, spectral_time_t **times_out, spectral_delta_t **deltas_out, spectral_value_t **values_out);
 
 signal_t * Spectral_AssembleSignal (int size, long long int *times, long long int *deltas, long long int *values);
 

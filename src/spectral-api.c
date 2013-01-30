@@ -305,7 +305,7 @@ signal_t * Spectral_ChopSignal (signal_t *signal, spectral_time_t t1, spectral_t
 }
 
 
-void Spectral_SerializeSignal (signal_t *signal, spectral_time_t **times_out, spectral_delta_t **deltas_out, spectral_value_t **values_out)
+int Spectral_SerializeSignal (signal_t *signal, spectral_time_t **times_out, spectral_delta_t **deltas_out, spectral_value_t **values_out)
 {
   int i = 0;
   spectral_time_t  *times  = NULL;
@@ -326,6 +326,8 @@ void Spectral_SerializeSignal (signal_t *signal, spectral_time_t **times_out, sp
   *times_out  = times;
   *deltas_out = deltas;
   *values_out = values;
+
+  return signal->cur_size;
 }
 
 signal_t * Spectral_AssembleSignal (int size, long long int *times, long long int *deltas, long long int *values)
