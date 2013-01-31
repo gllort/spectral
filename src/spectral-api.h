@@ -88,6 +88,8 @@ signal_t * Spectral_CloneSignal(signal_t *signal_in);
 
 int Spectral_CompressSignal(signal_t **signal_in, spectral_delta_t min_delta);
 
+int Spectral_GetSignalSize(signal_t *signal);
+
 spectral_time_t Spectral_GetSignalTime(signal_t *signal);
 
 spectral_time_t Spectral_GetSignalSamplingRate(signal_t *signal, int num_samples);

@@ -169,6 +169,15 @@ int Spectral_CompressSignal(signal_t **signal_in, spectral_time_t min_delta)
   return k;
 }
 
+int Spectral_GetSignalSize(signal_t *signal)
+{
+  if (signal != NULL)
+  {
+    return signal->cur_size;
+  }
+  return 0;
+}
+
 spectral_time_t Spectral_GetSignalTime(signal_t *signal)
 {
   if ((signal != NULL) && (signal->cur_size > 0))
