@@ -1,5 +1,7 @@
 
  [ + added, - removed, * changed ]
+ * (31/Jan/2013) Added routine Spectral_AddSortedN() to the API for a more efficient addition of signals.
+ 	Also added a new constructor to build the added signal.
  * (31/Jan/2013) Added routine Spectral_GetSignalSize() to the API
  * (31/Jan/2013) Spectral_AssembleSignal receives values of type spectral_value_t instead of long long int
  * (30/Jan/2013) Spectral_SerializeSignal now returns the size of the signal

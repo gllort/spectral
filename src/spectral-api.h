@@ -106,8 +106,6 @@ int Spectral_SerializeSignal (signal_t *signal, spectral_time_t **times_out, spe
 
 signal_t * Spectral_AssembleSignal (int size, spectral_time_t *times, spectral_time_t *deltas, spectral_value_t *values);
 
-//signal_t * Spectral_AssembleSignal2 (int size, struct burst_info *bursts);
-
 double Spectral_CompareSignals(signal_t *signal1_in, signal_t *signal2_in, int windowing);
 
 double Spectral_CompareSignalsFromFile(char *signal_file_1, char *signal_file_2, int windowing);
@@ -116,7 +114,7 @@ signal_t * Spectral_Add2(signal_t *signal1, signal_t *signal2);
 
 signal_t * Spectral_AddN(int num_signals, signal_t **signals);
 
-//signal_t * Spectral_AddSortedN (int num_signals, signal_t **signals);
+signal_t * Spectral_AddSortedN (int num_signals, signal_t **signals);
 
 enum
 {

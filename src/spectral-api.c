@@ -10,6 +10,10 @@
 
 #define _SPECTRAL_MAX(a, b) (a > b ? a : b)
 
+/* Private prototypes */
+signal_t * Spectral_AssembleSignal2 (int size, semantic_t *bursts);
+
+
 signal_t * Spectral_AllocateSignal(int size)
 {
   int max_size = _SPECTRAL_MAX(0, size);
@@ -361,10 +365,11 @@ signal_t * Spectral_AssembleSignal (int size, spectral_time_t *times, spectral_t
   return signal;
 }
 
-#if 0
-signal_t * Spectral_AssembleSignal2 (int size, struct burst_info *bursts)
+signal_t * Spectral_AssembleSignal2 (int size, semantic_t *bursts)
 {
+  int i = 0, count = 0;
   signal_t *signal = NULL;
+
   if (size > 0)
   {
     signal = Spectral_AllocateSignal(size);
@@ -375,21 +380,20 @@ signal_t * Spectral_AssembleSignal2 (int size, struct burst_info *bursts)
         if (i > 0) bursts[i].value = bursts[i].value + bursts[i-1].value;
         if (bursts[i+1].time - bursts[i].time > 0)
         {
-          signal->data[count].time  = bursts[i].time;
-          signal->data[count].delta = bursts[i+1].time - bursts[i].time;
-          signal->data[count].value = bursts[i].value;
+          Spectral_AddPoint3( signal,
+            bursts[i].time,
+            bursts[i+1].time - bursts[i].time,
+            bursts[i].value);
           count ++;
         }
       }
     }
   }
-  signal->data = (signal_data_t *)realloc(signal->data, sizeof(signal_data_t) * count);
-  signal->size = count;
+  signal->cur_size = count;
+  Spectral_ReallocateSignal(signal, count);
 
   return signal;
 }
-#endif
-
 
 double Spectral_CompareSignals(signal_t *signal1_in, signal_t *signal2_in, int windowing)
 {
@@ -578,43 +582,41 @@ signal_t * Spectral_AddN(int num_signals, signal_t **signals)
   return result;
 }
 
-#if 0
 signal_t * Spectral_AddSortedN (int num_signals, signal_t **signals)
 {
   int cur_signal = 0;
   int maxAddedSize = 0;
   int count = 0;
   int i = 0;
-  struct burst_info *bursts = NULL;
+  semantic_t *bursts = NULL;
   signal_t *addedSignal = NULL;
 
-  for (cur_signal=0; cur_signal<num_signals; cur_signal++)
+  for (cur_signal = 0; cur_signal < num_signals; cur_signal ++)
   {
-    maxAddedSize += signals[i]->size;
+    maxAddedSize += signals[i]->cur_size;
   }
-  bursts = (struct burst_info *)malloc (maxAddedSize * 2 * sizeof(struct burst_info));
-  
+  bursts = (semantic_t *)malloc(maxAddedSize * 2 * sizeof(semantic_t));
+
   for (cur_signal=0; cur_signal<num_signals; cur_signal++)
   {
-    for (i=0; i<signals[cur_signal]->size; i++)
+    for (i=0; i<signals[cur_signal]->cur_size; i++)
     {
-      bursts[count].time  = signals[cur_signal]->data[i].time;
-      bursts[count].value = signals[cur_signal]->data[i].value;
+      bursts[count].time  = SIGNAL_TIME(signals[cur_signal], i);
+      bursts[count].value = SIGNAL_VALUE(signals[cur_signal], i);
       count ++;
 
-      bursts[count].time  = signals[cur_signal]->data[i].time + signals[cur_signal]->data[i].delta; 
-      bursts[count].value = -( signals[cur_signal]->data[i].value );
+      bursts[count].time  = SIGNAL_TIME(signals[cur_signal], i) + SIGNAL_DELTA(signals[cur_signal], i);
+      bursts[count].value = -( SIGNAL_VALUE(signals[cur_signal], i) );
       count ++;
     }
   }
-  
-  qsort(bursts, count, sizeof(struct burst_info), qsort_cmp);
+
+  qsort(bursts, count, sizeof(semantic_t), qsort_cmp);
 
   addedSignal = Spectral_AssembleSignal2 (count, bursts);
   free(bursts);
   return addedSignal;
 }
-#endif
 
 static spectral_value_t windowingBarlett(int idx, int size)
 {
