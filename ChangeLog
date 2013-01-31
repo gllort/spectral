@@ -1,5 +1,6 @@
 
  [ + added, - removed, * changed ]
+ * (31/Jan/2013) Spectral_AssembleSignal receives values of type spectral_value_t instead of long long int
  * (30/Jan/2013) Spectral_SerializeSignal now returns the size of the signal
  * (30/Jan/2013) Added extern "C" directives in spectral-api.h to be used from C++
  * (30/Jan/2013) Header spectral-api.h was missing an include for stdlib.h

@@ -330,7 +330,7 @@ int Spectral_SerializeSignal (signal_t *signal, spectral_time_t **times_out, spe
   return signal->cur_size;
 }
 
-signal_t * Spectral_AssembleSignal (int size, long long int *times, long long int *deltas, long long int *values)
+signal_t * Spectral_AssembleSignal (int size, spectral_time_t *times, spectral_time_t *deltas, spectral_value_t *values)
 {
   int i = 0;
   signal_t *signal = NULL;

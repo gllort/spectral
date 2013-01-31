@@ -102,7 +102,7 @@ signal_t * Spectral_ChopSignal (signal_t *signal, spectral_time_t t1, spectral_t
 
 int Spectral_SerializeSignal (signal_t *signal, spectral_time_t **times_out, spectral_delta_t **deltas_out, spectral_value_t **values_out);
 
-signal_t * Spectral_AssembleSignal (int size, long long int *times, long long int *deltas, long long int *values);
+signal_t * Spectral_AssembleSignal (int size, spectral_time_t *times, spectral_time_t *deltas, spectral_value_t *values);
 
 //signal_t * Spectral_AssembleSignal2 (int size, struct burst_info *bursts);
 
