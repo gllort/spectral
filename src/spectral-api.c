@@ -8,11 +8,10 @@
 #include "optim.h"
 #include "wavelet.h"
 
-#define _SPECTRAL_MAX(a, b) (a > b ? a : b)
-
 /* Private prototypes */
 signal_t * Spectral_AssembleSignal2 (int size, semantic_t *bursts);
 
+#define _SPECTRAL_MAX(a, b) (a > b ? a : b)
 
 signal_t * Spectral_AllocateSignal(int size)
 {
@@ -201,7 +200,6 @@ spectral_time_t Spectral_GetSignalSamplingRate(signal_t *signal, int num_samples
 
 int Spectral_DumpSignal(signal_t *signal, char *file)
 {
-#if defined(DEBUG_MODE)  
   FILE *fd = NULL;
 
   if ((signal != NULL) && (file != NULL) && ((fd = fopen(file, "w")) != NULL))
@@ -214,8 +212,6 @@ int Spectral_DumpSignal(signal_t *signal, char *file)
     fclose(fd);
     return 0;
   }
-#endif
-
   return -1;
 }
 
@@ -321,26 +317,31 @@ signal_t * Spectral_ChopSignal (signal_t *signal, spectral_time_t t1, spectral_t
 int Spectral_SerializeSignal (signal_t *signal, spectral_time_t **times_out, spectral_delta_t **deltas_out, spectral_value_t **values_out)
 {
   int i = 0;
+  int size = 0;
   spectral_time_t  *times  = NULL;
   spectral_delta_t *deltas = NULL;
   spectral_value_t *values = NULL;
 
-  times  = (spectral_time_t  *)malloc(signal->cur_size * sizeof(spectral_time_t));
-  deltas = (spectral_delta_t *)malloc(signal->cur_size * sizeof(spectral_delta_t));
-  values = (spectral_value_t *)malloc(signal->cur_size * sizeof(spectral_value_t));
-
-  for (i=0; i<signal->cur_size; i++)
+  if ((signal != NULL) && (signal->cur_size > 0)) 
   {
-    times[i]  = signal->data[i].time;
-    deltas[i] = signal->data[i].delta;
-    values[i] = signal->data[i].value;
+    size   = signal->cur_size;
+    times  = (spectral_time_t  *)malloc(signal->cur_size * sizeof(spectral_time_t));
+    deltas = (spectral_delta_t *)malloc(signal->cur_size * sizeof(spectral_delta_t));
+    values = (spectral_value_t *)malloc(signal->cur_size * sizeof(spectral_value_t));
+
+    for (i=0; i<size; i++)
+    {
+      times[i]  = signal->data[i].time;
+      deltas[i] = signal->data[i].delta;
+      values[i] = signal->data[i].value;
+    }
   }
 
   *times_out  = times;
   *deltas_out = deltas;
   *values_out = values;
 
-  return signal->cur_size;
+  return size;
 }
 
 signal_t * Spectral_AssembleSignal (int size, spectral_time_t *times, spectral_time_t *deltas, spectral_value_t *values)
@@ -348,9 +349,10 @@ signal_t * Spectral_AssembleSignal (int size, spectral_time_t *times, spectral_t
   int i = 0;
   signal_t *signal = NULL;
 
+  signal = Spectral_AllocateSignal(size);
+
   if (size > 0)
   {
-    signal = Spectral_AllocateSignal(size);
     if (signal != NULL)
     {
       for (i = 0; i < size; i ++)
@@ -370,22 +372,19 @@ signal_t * Spectral_AssembleSignal2 (int size, semantic_t *bursts)
   int i = 0, count = 0;
   signal_t *signal = NULL;
 
-  if (size > 0)
+  signal = Spectral_AllocateSignal(size);
+  if ((size > 0) && (signal != NULL))
   {
-    signal = Spectral_AllocateSignal(size);
-    if (signal != NULL)
+    for (i = 0; i < size - 1; i ++)
     {
-      for (i = 0; i < size - 1; i ++)
+    if (i > 0) bursts[i].value = bursts[i].value + bursts[i-1].value;
+      if (bursts[i+1].time - bursts[i].time > 0)
       {
-        if (i > 0) bursts[i].value = bursts[i].value + bursts[i-1].value;
-        if (bursts[i+1].time - bursts[i].time > 0)
-        {
-          Spectral_AddPoint3( signal,
-            bursts[i].time,
-            bursts[i+1].time - bursts[i].time,
-            bursts[i].value);
-          count ++;
-        }
+        Spectral_AddPoint3( signal, 
+          bursts[i].time,
+          bursts[i+1].time - bursts[i].time,
+          bursts[i].value);
+        count ++;
       }
     }
   }
@@ -593,28 +592,40 @@ signal_t * Spectral_AddSortedN (int num_signals, signal_t **signals)
 
   for (cur_signal = 0; cur_signal < num_signals; cur_signal ++)
   {
-    maxAddedSize += signals[i]->cur_size;
+    if (signals[i] != NULL)
+      maxAddedSize += signals[i]->cur_size;
   }
-  bursts = (semantic_t *)malloc(maxAddedSize * 2 * sizeof(semantic_t));
 
-  for (cur_signal=0; cur_signal<num_signals; cur_signal++)
+
+  if (maxAddedSize > 0)
   {
-    for (i=0; i<signals[cur_signal]->cur_size; i++)
+    bursts = (semantic_t *)malloc(maxAddedSize * 2 * sizeof(semantic_t));
+ 
+    for (cur_signal=0; cur_signal<num_signals; cur_signal++)
     {
-      bursts[count].time  = SIGNAL_TIME(signals[cur_signal], i);
-      bursts[count].value = SIGNAL_VALUE(signals[cur_signal], i);
-      count ++;
-
-      bursts[count].time  = SIGNAL_TIME(signals[cur_signal], i) + SIGNAL_DELTA(signals[cur_signal], i);
-      bursts[count].value = -( SIGNAL_VALUE(signals[cur_signal], i) );
-      count ++;
+      if (signals[i] != NULL)
+      {
+        for (i=0; i<signals[cur_signal]->cur_size; i++)
+        {
+          bursts[count].time  = SIGNAL_TIME(signals[cur_signal], i);
+          bursts[count].value = SIGNAL_VALUE(signals[cur_signal], i);
+          count ++;
+  
+          bursts[count].time  = SIGNAL_TIME(signals[cur_signal], i) + SIGNAL_DELTA(signals[cur_signal], i);
+          bursts[count].value = -( SIGNAL_VALUE(signals[cur_signal], i) );
+          count ++;
+        }
+      }
     }
   }
-
-  qsort(bursts, count, sizeof(semantic_t), qsort_cmp);
+  
+  if (count > 0)
+  { 
+    qsort(bursts, count, sizeof(semantic_t), qsort_cmp);
+  }
 
   addedSignal = Spectral_AssembleSignal2 (count, bursts);
-  free(bursts);
+  if (bursts != NULL) free(bursts);
   return addedSignal;
 }
 

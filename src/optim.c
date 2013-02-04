@@ -210,7 +210,6 @@ signal_t *GenerateSinus(long long int span, long long int T2, long long int accu
 
 spectral_time_t Maximum(signal_data_t *maximum_point)
 {
-  fprintf(stderr, "[DEBUG] Maximum:: time=%lld delta=%lld calc=%lld\n", maximum_point->time, maximum_point->delta, (maximum_point->time+maximum_point->delta/2));
   return (maximum_point->time+maximum_point->delta/2);
 }
 
@@ -306,7 +305,6 @@ Analysis (signal_t *signal1, long long int t0,
       goodness3 = goodprev3;
       zigazaga = zigazagaprev;
     }
-  fprintf(stderr , "[DEBUG] T2=%lld\n", T2);
 
   fprintf (err, "Main Period=%lld Iters=%f\n", T2 / 1000000,
 	   (1.0 * (t1 - t0)) / (1.0 * T2 / 1000000));
@@ -413,7 +411,6 @@ Analysis (signal_t *signal1, long long int t0,
 	Cutter_signal_Maximum (signal3, sizeSig3, min + min2 * 5000000,
 			       min + min2 * 5000000 + T2);
 */
-fprintf(stderr, "[DEBUG] max=%lld\n", max);
     }
   else
     {
@@ -543,7 +540,6 @@ fprintf(stderr, "[DEBUG] max=%lld\n", max);
    
       Cutter_signal(signal1, min + min2 * 5000000 + max, min + min2 * 5000000 + max + n_iters * T2, NULL, signalout);
 
-fprintf(stderr, "[DEBUG] min=%lld min2=%lld max=%lld n_iters=%d T2=%lld\n", min, min2, max, n_iters, T2);
 
       fprintf (out, "   Detected %d iters between %lld and %lld ns\n",
 	       n_iters, min + min2 * 5000000 + max,
