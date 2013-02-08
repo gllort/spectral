@@ -135,6 +135,7 @@ signal_t * Spectral_CloneSignal(signal_t *signal_in)
       signal_out->data[i].time  = signal_in->data[i].time;
       signal_out->data[i].delta = signal_in->data[i].delta;
       signal_out->data[i].value = signal_in->data[i].value;
+      signal_out->cur_size ++;
     }
   }
   return signal_out;
