@@ -1,5 +1,7 @@
 
  [ + added, - removed, * changed ]
+ * (12/Feb/2013) Fixed access out of range in Spectral_AddSortedN(). 
+ 	Also, fixed missing initializations of variables goodness* in Analysis().
  * (08/Feb/2013) Fixed Spectral_CloneSignal(), the output signal size was not incremented.
  * (04/Feb/2013) Fixed some checks so as not to crash when operating with NULL or empty signals.
  + (31/Jan/2013) Added routine Spectral_AddSortedN() to the API for a more efficient addition of signals.

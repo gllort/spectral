@@ -593,10 +593,11 @@ signal_t * Spectral_AddSortedN (int num_signals, signal_t **signals)
 
   for (cur_signal = 0; cur_signal < num_signals; cur_signal ++)
   {
-    if (signals[i] != NULL)
-      maxAddedSize += signals[i]->cur_size;
+    if (signals[cur_signal] != NULL)
+    {
+      maxAddedSize += signals[cur_signal]->cur_size;
+    }
   }
-
 
   if (maxAddedSize > 0)
   {
@@ -604,7 +605,7 @@ signal_t * Spectral_AddSortedN (int num_signals, signal_t **signals)
  
     for (cur_signal=0; cur_signal<num_signals; cur_signal++)
     {
-      if (signals[i] != NULL)
+      if (signals[cur_signal] != NULL)
       {
         for (i=0; i<signals[cur_signal]->cur_size; i++)
         {

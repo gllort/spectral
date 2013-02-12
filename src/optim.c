@@ -241,6 +241,7 @@ Analysis (signal_t *signal1, long long int t0,
   T2 = 1000000;
   Tcorr = -1;
   zigazaga = 0;
+  goodness = goodness2 = goodness3 = 0;
   goodcorr = goodcorr2 = goodcorr3 = 0;
   goodprev = goodprev2 = goodprev3 = 0;
   zigazagacorr = zigazagaprev = 0;
