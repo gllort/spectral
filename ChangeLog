@@ -1,5 +1,6 @@
 
  [ + added, - removed, * changed ]
+ * (08/Mar/2013) Upgraded to version 3.0.
  * (12/Feb/2013) Fixed access out of range in Spectral_AddSortedN(). 
  	Also, fixed missing initializations of variables goodness* in Analysis().
  * (08/Feb/2013) Fixed Spectral_CloneSignal(), the output signal size was not incremented.

@@ -6,7 +6,7 @@
 #########################
 
 # Initialize autoconf & define package name, version and bug-report address 
-AC_INIT(Spectral Analysis 2.0, 1.0, tools@bsc.es)
+AC_INIT(Spectral Analysis 3.0, 1.0, tools@bsc.es)
 
 # GNU Autotools intermediate files are stored in the following directory
 AC_CONFIG_AUX_DIR(config)
