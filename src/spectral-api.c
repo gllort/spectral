@@ -412,6 +412,8 @@ double Spectral_CompareSignals(signal_t *signal1_in, signal_t *signal2_in, int w
   dbg_autocross1 = "autocross_sig2.txt";
 #endif
 
+  if ((signal1_in == NULL) || (signal2_in == NULL)) return 0;
+
   /* XXX Input signals are copied because shifting and windowing modifies them (deleted at exit) */
 
   sig1 = Spectral_CloneSignal( signal1_in );
@@ -670,7 +672,7 @@ int Spectral_ExecuteAnalysis(signal_t *orig_signal, int target_iters, int window
 {
   signal_t *signal = NULL;
   spectral_time_t timeShifted = 0, totalTime = 0;
-  
+
   /* Input signal is cloned because shifting (and windowing) modifies it */
 
   signal = Spectral_CloneSignal( orig_signal );

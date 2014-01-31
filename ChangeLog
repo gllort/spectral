@@ -1,5 +1,7 @@
 
  [ + added, - removed, * changed ]
+ * (31/Jan/2014) Added check in CompareSignals for NULL input signals
+    Also, upgraded to version 3.1.
  + (08/Mar/2013) Added script plot-signal
  * (08/Mar/2013) Upgraded to version 3.0.
  * (12/Feb/2013) Fixed access out of range in Spectral_AddSortedN(). 
