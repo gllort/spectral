@@ -1,6 +1,7 @@
 
  [ + added, - removed, * changed ]
- * (31/Jan/2014) Added check in CompareSignals for NULL input signals
+ * (31/Jan/2014) Added check in CompareSignals for NULL input signals.
+    Changes in configure.ac for compatibility with newer versions of autotools.
     Also, upgraded to version 3.1.
  + (08/Mar/2013) Added script plot-signal
  * (08/Mar/2013) Upgraded to version 3.0.

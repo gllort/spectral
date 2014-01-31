@@ -21,10 +21,10 @@ esac
 
 # Initialize automake
 AM_INIT_AUTOMAKE
-AM_PROG_MKDIR_P
+AC_PROG_MKDIR_P
 
 # Specify the output configuration header file
-AM_CONFIG_HEADER(config.h)
+AC_CONFIG_HEADER(config.h)
 
 # Search for libtool support
 AC_LIBTOOL_DLOPEN
