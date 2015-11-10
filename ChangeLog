@@ -1,5 +1,6 @@
 
  [ + added, - removed, * changed ]
+ + (10/Nov/2015) Added parameters -i and -s to specify the size of the final trces by number of iterations (-i) or by approximate size (-s). Also, upgraded to version 3.2.0.
  * (31/Jan/2014) Added check in CompareSignals for NULL input signals.
     Changes in configure.ac for compatibility with newer versions of autotools.
     Also, upgraded to version 3.1.

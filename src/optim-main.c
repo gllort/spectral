@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <libgen.h>
 #include "wavelet.h"
 #include "optim.h"
 #include "optim-macros.h"
@@ -36,6 +37,105 @@ void ParseTraceHeader(
   fclose(fd);
 }
 
+void PrintUsage(char *app_name) 
+{
+  fprintf(stdout, "\nSYNTAX\n"
+                  "  %s [OPTIONS] <trace1.prv> <trace2.prv> ... <METRIC>\n\n"
+                  "OPTIONS\n"
+                  "  Choose one between:\n"
+                  "    -i <# iterations>\n"
+                  "    -s <size in Mb>\n"
+                  "\n"
+                  "METRICS\n"
+                  "  Choose one between:\n"
+                  "    BW, MPIp2p, CPUBurst, CPUDurBurst, IPC\n\n", basename(app_name));
+}
+
+void ParseArgs(int argc, char **argv, int *out_num_traces, char ***out_input_traces, char **out_analysis_type, int *out_target_iterations)
+{
+  int i                 = 0;
+  int j                 = 1;
+  int target_iterations = 0;
+  int use_iterations    = 0;
+  int target_size       = 0;
+  int use_size          = 0;
+  int num_traces        = 0;
+  char **input_traces   = NULL;
+  char *analysis_type   = NULL;
+  char str[32];
+
+  if ( ( argc == 1) ||
+       ((argc == 2) &&
+       (strcmp(argv[1], "-h") == 0) || (strcmp(argv[1], "--help") == 0)))
+  {
+    PrintUsage(argv[0]);
+    exit(EXIT_SUCCESS);
+  }
+
+  if (argv[1][0] == '-')
+  {
+    for (j = 1; (j < argc - 1) && (argv[j][0] == '-'); j++)
+    {
+      switch (argv[j][1])
+      {
+        case 'i':
+          j++;
+          target_iterations = atoi(argv[j]);
+          use_iterations = 1;
+          break;
+        case 's':
+          j++;
+          target_size = atoi(argv[j]);
+          use_size = 1;
+          sprintf(str, "%lld", target_size * 1000 * 1000);
+          setenv("SPECTRAL_TRACE_SIZE", str, 1);
+          target_iterations = 0;
+          break;
+        default:
+          fprintf(stderr, "\n*** ERROR: Invalid parameter %s\n", argv[j]);
+          PrintUsage(argv[0]);
+          exit(EXIT_FAILURE);
+          break;
+      }
+    }
+  }
+
+  if (use_iterations && use_size)
+  {
+    fprintf(stderr, "\n*** ERROR: Please specify either -i or -s options, but not both!\n");
+    PrintUsage(argv[0]);
+    exit(EXIT_FAILURE);
+  }
+
+  num_traces = argc - j - 1;
+
+  input_traces = (char **)malloc(sizeof(char *) * num_traces);
+
+  for (i = 0; i < num_traces; i ++)
+  {
+    input_traces[i] = argv[j + i];
+  }
+
+  analysis_type = argv[argc - 1];
+
+  if ((strcmp(analysis_type, "BW") != 0) &&
+      (strcmp(analysis_type, "IPC") != 0) && 
+      (strcmp(analysis_type, "MPIp2p") != 0) && 
+      (strcmp(analysis_type, "CPUBurst") != 0) && 
+      (strcmp(analysis_type, "CPUDurBurst") != 0) && 
+      (strcmp(analysis_type, "IPC") != 0))
+  {
+    fprintf(stderr, "\n*** ERROR: Signal requested '%s' is not a valid signal.\n", analysis_type);
+    PrintUsage(argv[0]);
+    exit(EXIT_FAILURE);
+  }
+
+  *out_num_traces        = num_traces;
+  *out_input_traces      = input_traces;
+  *out_analysis_type     = analysis_type;
+  *out_target_iterations = target_iterations;
+}
+
 int
 main (int argc, char *argv[])
 {
@@ -59,34 +159,24 @@ main (int argc, char *argv[])
   FILE *fDB1;
 #endif
   int num_flushes = 0;
-
-  /* Check arguments */
-  if (argc < 3)
-  {
-    fprintf(stderr, "Usage: %s <first prv file> <second prv file> ... <BW or MPIp2p or CPUBurst or CPUDurBurst or IPC>\n", argv[0]);
-    exit (-1);
-  }
-
-  /* Initializations */
-  int num_traces = argc - 2;
-
+  int num_traces = 0;
   char **input_traces = NULL;
   char *analysis_type = NULL;
+  int target_iterations = 0;
+
+  ParseArgs(argc, argv, &num_traces, &input_traces, &analysis_type, &target_iterations);
 
   periods   = (long long int *)      malloc (sizeof (long int) * num_traces);
   totaltime = (long long int *) malloc (sizeof (long long int) * num_traces);
   p         = (int *)           malloc (sizeof (int) * num_traces);
   signals   = (char **)         malloc (sizeof (char *) * num_traces);
   traces    = (char **)         malloc (sizeof (char *) * num_traces);
-  input_traces = (char **)      malloc (sizeof (char *) * num_traces); 
 
   for (i = 0; i < num_traces; i ++)
   {
     signals[i] = (char *) malloc (sizeof (char) * 256);
     traces[i]  = (char *) malloc (sizeof (char) * 256);
-    input_traces[i] = argv[i+1];
   }
-  analysis_type = argv[argc - 1];
 
   change = 0;
 
@@ -286,7 +376,7 @@ main (int argc, char *argv[])
           fflush(stdout);
           Analysis(signal_to_analyze, a, b, d-c, c, d, 
             analysis_type, input_traces[trace_num], 1, signal_dur_running,
-            &periods_found, &periods[trace_num], signals[trace_num], &t0, &t1, traces[trace_num], hp, jp, num_chop, 0, trace_size,
+            &periods_found, &periods[trace_num], signals[trace_num], &t0, &t1, traces[trace_num], hp, jp, num_chop, target_iterations, trace_size,
             totaltime[trace_num]);
         }
       }

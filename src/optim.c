@@ -427,7 +427,7 @@ Analysis (signal_t *signal1, long long int t0,
 
 
   /* tall sensible al tamany */
-  if (trace != NULL && T2 != 0)
+  if (trace != NULL && T2 != 0 && requested_iters == 0)
     {
 
       printf ("\nCalculating size of 1 iteration...");
@@ -522,7 +522,10 @@ Analysis (signal_t *signal1, long long int t0,
 
     }
   else
+  {
     n_iters = MAX (requested_iters, 2);
+    n_iters = MIN (n_iters, (int)(currentPeriod->iters));
+  }
 
   /* fi tall sensible al tamany */
 
