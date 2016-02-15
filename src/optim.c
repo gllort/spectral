@@ -225,11 +225,11 @@ Analysis (signal_t *signal1, long long int t0,
 #ifdef TRACE_MODE
   Extrae_user_function (1);
 #endif
-  long long int min, min2, T2, Tcorr, Tprev, requested_final_size;
+  long long int min, min2, T2, Tcorr, Tprev, requested_final_size = 0;
   long long int size_1_iter, size_1_iter_2, max, accuracy;
   double goodness, goodcorr, goodness2, goodcorr2, goodness3, goodcorr3,
     goodprev, goodprev2, goodprev3;
-  int correct, zigazaga, nzeros, zigazagacorr, zigazagaprev, n_iters;
+  int correct, zigazaga, nzeros, zigazagacorr, zigazagaprev, n_iters = 0;
   char *env_var;
   Period_t *currentPeriod = NULL;
 
@@ -425,9 +425,14 @@ Analysis (signal_t *signal1, long long int t0,
 */
     }
 
+  /* We look for the environment var in order to get max trace size */
+  if ((env_var = getenv ("SPECTRAL_TRACE_SIZE")) != NULL)
+  {
+    requested_final_size = atoll (env_var); /* 100000000 ~ 100 Mb */
+  }
 
   /* tall sensible al tamany */
-  if (trace != NULL && T2 != 0 && requested_iters == 0)
+  if (trace != NULL && T2 != 0 && requested_iters == 0 && requested_final_size != 0)
     {
 
       printf ("\nCalculating size of 1 iteration...");
@@ -465,16 +470,6 @@ Analysis (signal_t *signal1, long long int t0,
 
       printf ("Done!\n");
       fflush (stdout);
-
-      /* We look for the environment var in order to get max trace size */
-      if ((env_var = getenv ("SPECTRAL_TRACE_SIZE")) != NULL)
-      {
-	requested_final_size = atoll (env_var);
-      }
-      else
-      {
-	requested_final_size = 100000000LL; /* ~100 Mb */
-      }
 
       max = max + 2 * T2;
 
@@ -529,11 +524,12 @@ Analysis (signal_t *signal1, long long int t0,
 
   /* fi tall sensible al tamany */
 
-  if (T2 > 999999
+  if ((n_iters > 0) &&
+      (T2 > 999999
       &&
       ((goodness > 0.7 && goodness < 1.3 && goodness2 > 0.7
 	&& goodness2 < 10.3 && goodness3 < 0.9) || zigazaga == 1) && cut == 1
-      && T2 / 1000000 < (t1 - t0) / 3.5)
+      && T2 / 1000000 < (t1 - t0) / 3.5) && (requested_iters != 0 || requested_final_size != 0))
     {
       if (trace != NULL)
 	{
@@ -572,6 +568,7 @@ Analysis (signal_t *signal1, long long int t0,
 #ifdef TRACE_MODE
   Extrae_user_function (0);
 #endif
+
   return currentPeriod;
 }
 

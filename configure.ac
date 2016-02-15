@@ -55,6 +55,7 @@ AM_PROG_CC_C_O
 AX_OPENMP
 AX_PROG_FFT
 AX_PROG_EXTRAE
+AX_LIBTOOLS
 
 #############################
 #    Checks for headers     #

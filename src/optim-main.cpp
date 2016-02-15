@@ -8,6 +8,10 @@
 #include "optim.h"
 #include "optim-macros.h"
 #include "optim-functions.h"
+#include "config.h"
+#if defined(HAVE_LIBTOOLS)
+#include "reconstruct_trace.h"
+#endif
 
 void ParseTraceHeader(
   char          *trace, 
@@ -43,20 +47,24 @@ void PrintUsage(char *app_name)
                   "  %s [OPTIONS] <trace1.prv> <trace2.prv> ... <METRIC>\n\n"
                   "OPTIONS\n"
                   "  Choose one between:\n"
-                  "    -i <# iterations>\n"
-                  "    -s <size in Mb>\n"
+                  "    -i <# iterations> : Generate a chop containing the given number of iterations.\n"
+                  "    -s <size in Mb>   : Generate a chop of the given size.\n"
+#if defined(HAVE_LIBTOOLS)
+                  "    -r                : Reconstruct the trace marking the iterations.\n"
+#endif
                   "\n"
                   "METRICS\n"
                   "  Choose one between:\n"
                   "    BW, MPIp2p, CPUBurst, CPUDurBurst, IPC\n\n", basename(app_name));
 }
 
-void ParseArgs(int argc, char **argv, int *out_num_traces, char ***out_input_traces, char **out_analysis_type, int *out_target_iterations)
+void ParseArgs(int argc, char **argv, int *out_num_traces, char ***out_input_traces, char **out_analysis_type, int *out_target_iterations, int *out_reconstruct)
 {
   int i                 = 0;
   int j                 = 1;
   int target_iterations = 0;
   int use_iterations    = 0;
+  int reconstruct_trace = 0;
   int target_size       = 0;
   int use_size          = 0;
   int num_traces        = 0;
@@ -83,6 +91,11 @@ void ParseArgs(int argc, char **argv, int *out_num_traces, char ***out_input_tra
           target_iterations = atoi(argv[j]);
           use_iterations = 1;
           break;
+#if defined(HAVE_LIBTOOLS)
+        case 'r':
+          reconstruct_trace = 1;
+          break;
+#endif
         case 's':
           j++;
           target_size = atoi(argv[j]);
@@ -134,6 +147,7 @@ void ParseArgs(int argc, char **argv, int *out_num_traces, char ***out_input_tra
   *out_input_traces      = input_traces;
   *out_analysis_type     = analysis_type;
   *out_target_iterations = target_iterations;
+  *out_reconstruct       = reconstruct_trace;
 }
 
 int
@@ -163,10 +177,13 @@ main (int argc, char *argv[])
   char **input_traces = NULL;
   char *analysis_type = NULL;
   int target_iterations = 0;
+  int reconstruct_trace = 0;
+  Period_t **detected_periods = NULL;
+  int num_detected_periods = 0;
 
-  ParseArgs(argc, argv, &num_traces, &input_traces, &analysis_type, &target_iterations);
+  ParseArgs(argc, argv, &num_traces, &input_traces, &analysis_type, &target_iterations, &reconstruct_trace);
 
-  periods   = (long long int *)      malloc (sizeof (long int) * num_traces);
+  periods   = (long long int *) malloc (sizeof (long int) * num_traces);
   totaltime = (long long int *) malloc (sizeof (long long int) * num_traces);
   p         = (int *)           malloc (sizeof (int) * num_traces);
   signals   = (char **)         malloc (sizeof (char *) * num_traces);
@@ -214,11 +231,11 @@ main (int argc, char *argv[])
     
 
     fprintf(hp, "\nGenerating the flushing signal..."); fflush(stdout);
-    signal_flushing = Generate_Event_Signal(input_traces[trace_num], 40000003, "signal_flush.txt");
+    signal_flushing = Generate_Event_Signal(input_traces[trace_num], 40000003, (char *)"signal_flush.txt");
     fprintf(hp, "done!\n");
 
     /* Get the boundaries of the flushing regions */
-    num_flushes = GetBoundaries(signal_flushing, totaltime[trace_num], &t0_flushing, &t1_flushing, "boundaries.txt");
+    num_flushes = GetBoundaries(signal_flushing, totaltime[trace_num], &t0_flushing, &t1_flushing, (char *)"boundaries.txt");
 
  
     /* Generate the signal we will study */
@@ -244,33 +261,33 @@ main (int argc, char *argv[])
 
     if (strcmp(analysis_type, "BW") == 0) 
     {
-      signal_to_analyze = Generate_BW_Signal( input_traces[trace_num], "signal.txt" );
+      signal_to_analyze = Generate_BW_Signal( input_traces[trace_num], (char *)"signal.txt" );
       signal_to_sample  = signal_to_analyze;
       samples_to_take   = 1024;
     }
     else if (strcmp(analysis_type, "IPC") == 0)
     {
-      signal_to_analyze = Generate_IPC_Signal( input_traces[trace_num], filtered_trace, "signal.txt" );
+      signal_to_analyze = Generate_IPC_Signal( input_traces[trace_num], filtered_trace, (char *)"signal.txt" );
       signal_to_sample  = signal_to_analyze;
       samples_to_take   = 4096;
     }
     else if (strcmp(analysis_type, "MPIp2p") == 0)
     {
-      signal_to_analyze = Generate_MPIp2p_Signal( input_traces[trace_num], filtered_trace, "signal.txt" );
+      signal_to_analyze = Generate_MPIp2p_Signal( input_traces[trace_num], filtered_trace, (char *)"signal.txt" );
       signal_to_sample  = signal_to_analyze;
       samples_to_take   = 4096;
     }
     else if (strcmp(analysis_type, "CPUBurst") == 0)
     {
       Generate_Running_Signals( input_traces[trace_num], filtered_trace, totaltime[trace_num]/10000000, 
-        &signal_in_running, "signal_in_running.txt", &signal_dur_running, "signal_dur_running.txt" );
+        &signal_in_running, (char*)"signal_in_running.txt", &signal_dur_running, (char *)"signal_dur_running.txt" );
       signal_to_sample  = signal_to_analyze = signal_in_running;
       samples_to_take   = 4096;
     }
     else if (strcmp(analysis_type, "CPUDurBurst") == 0)
     {
       Generate_Running_Signals( input_traces[trace_num], filtered_trace, totaltime[trace_num]/100000,
-        &signal_in_running, "signal_in_running.txt", &signal_dur_running, "signal_dur_running.txt" );
+        &signal_in_running, (char *)"signal_in_running.txt", &signal_dur_running, (char *)"signal_dur_running.txt" );
       signal_to_sample  = signal_in_running;
       signal_to_analyze = signal_dur_running;
       if (trace_size<10000000000LL) { samples_to_take = 4096; }
@@ -288,16 +305,16 @@ main (int argc, char *argv[])
     {
       /* Generate running burst signal anyway to obtain a right cut of the traces */
       Generate_Running_Signals( input_traces[trace_num], filtered_trace, totaltime[trace_num]/10000000,
-        &signal_in_running, "signal_in_running.txt", &signal_dur_running, "signal_dur_running.txt" );        
+        &signal_in_running, "signal_in_running.txt", &signal_dur_running, (char *)"signal_dur_running.txt" );        
     }
     
     /* Global analysis using wavelets */
 
-    Sampler_wavelet( signal_to_sample, &wavelet_samples, samples_to_take, "signal_sampled.txt" );
+    Sampler_wavelet( signal_to_sample, &wavelet_samples, samples_to_take, (char *)"signal_sampled.txt" );
 
     /* XXX Change wavelet so that returns an array of periodical regions without flushing (struct with f1, f2 fields) and a count, 
      * instead of reusing the input wavelet_samples vector!!! */
-    Wavelet( wavelet_samples, samples_to_take, &num_periodical_regions_without_flushing, "wavelet.txt" );
+    Wavelet( wavelet_samples, samples_to_take, &num_periodical_regions_without_flushing, (char *)"wavelet.txt" );
 
     /* Selection of the peridical regions without flushing */
     
@@ -370,14 +387,25 @@ main (int argc, char *argv[])
         /* Analysis of the regions */
         if ( (b != 0) && ((d - c) > 0.05*totaltime[trace_num]/1000000) )
         {
+          Period_t *cp = NULL;
+
           num_chop++;
           fprintf(hp, "\n");
           fprintf(stdout, "\nExecuting analysis... ");
           fflush(stdout);
-          Analysis(signal_to_analyze, a, b, d-c, c, d, 
-            analysis_type, input_traces[trace_num], 1, signal_dur_running,
-            &periods_found, &periods[trace_num], signals[trace_num], &t0, &t1, traces[trace_num], hp, jp, num_chop, target_iterations, trace_size,
-            totaltime[trace_num]);
+          cp = Analysis(signal_to_analyze, a, b, d-c, c, d, 
+                        analysis_type, input_traces[trace_num], 1, signal_dur_running,
+                        &periods_found, &periods[trace_num], signals[trace_num], &t0, &t1, traces[trace_num], hp, jp, num_chop, target_iterations, trace_size,
+                        totaltime[trace_num]);
+
+#if defined(HAVE_LIBTOOLS)
+          if (reconstruct_trace)
+          {
+            detected_periods = (Period_t **)malloc((num_detected_periods + 1) * sizeof(Period_t *));
+            detected_periods[num_detected_periods] = cp;
+            num_detected_periods ++;
+          }
+#endif
         }
       }
     }
@@ -385,6 +413,15 @@ main (int argc, char *argv[])
     {
       fprintf(stdout, "No periods found for trace %s\n", input_traces[trace_num]);
     }
+
+#if defined(HAVE_LIBTOOLS)
+    if (reconstruct_trace)
+    {
+      fprintf(stdout, "\nReconstructing trace... ");
+      fflush(stdout);
+      Reconstruct((char *)input_traces[trace_num], num_detected_periods, detected_periods);
+    }
+#endif
   }
     
   fprintf (hp, "Speedup Analysis\n");
