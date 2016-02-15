@@ -424,6 +424,9 @@ AC_DEFUN([AX_LIBTOOLS],
   AC_MSG_CHECKING([for prvparser-config])
   if test ! -f ${LibToolsDir}/bin/prvparser-config ; then
     HaveLibtools = "no"
+    AC_MSG_RESULT([no])
+  else
+    AC_MSG_RESULT([yes])
   fi
   
   if test "${HaveLibtools}" = "yes" ; then
