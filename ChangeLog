@@ -1,5 +1,6 @@
 
  [ + added, - removed, * changed ]
+ * (03/Mar/2016) Upgraded to version 3.4.0
  + (03/Mar/2016) Added new binary csv-analysis that takes the output CSV from a Paraver timeline and converts it into a signal to analyze. Paraver integration that calls this new binary also developed.
  + (15/Feb/2016) Upgraded to version 3.3.0.
  + (15/Feb/2016) Added parameter -r to reconstruct an output trace marking the iterations with events.
