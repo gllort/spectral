@@ -1,6 +1,8 @@
 
  [ + added, - removed, * changed ]
- + (15/Feb/2015) Added parameter -r to reconstruct an output trace marking the iterations with events.
+ + (03/Mar/2016) Added new binary csv-analysis that takes the output CSV from a Paraver timeline and converts it into a signal to analyze. Paraver integration that calls this new binary also developed.
+ + (15/Feb/2016) Upgraded to version 3.3.0.
+ + (15/Feb/2016) Added parameter -r to reconstruct an output trace marking the iterations with events.
  + (10/Nov/2015) Added parameters -i and -s to specify the size of the final trces by number of iterations (-i) or by approximate size (-s). Also, upgraded to version 3.2.0.
  * (31/Jan/2014) Added check in CompareSignals for NULL input signals.
     Changes in configure.ac for compatibility with newer versions of autotools.

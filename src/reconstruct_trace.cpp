@@ -3,6 +3,7 @@
 #include "ParaverTraceThread.h"
 #include "ParaverTraceTask.h"
 #include "ParaverTraceApplication.h"
+#include "reconstruct_trace.h"
 #include "spectral-api.h"
 
 #include <iostream>
@@ -11,8 +12,8 @@
 
 std::vector<Period_t *> Periods;
 
-unsigned long long *CurrentIterTime;
-int                *CurrentPeriod;
+long long int *CurrentIterTime;
+int           *CurrentPeriod;
 
 using namespace std;
 
@@ -47,7 +48,7 @@ Process::Process (string prvFile, bool multievents, string tracename, int num_de
         }
         num_tasks = va[0]->get_tasks().size();
 
-        CurrentIterTime = (unsigned long long *)malloc(num_tasks * sizeof(unsigned long long));
+        CurrentIterTime = (long long int *)malloc(num_tasks * sizeof(long long int));
         CurrentPeriod   = (int *)malloc(num_tasks * sizeof(int));
 
 	traceout.open (tracename.c_str());
@@ -64,7 +65,7 @@ Process::Process (string prvFile, bool multievents, string tracename, int num_de
 
 	for (int i = 0; i < num_tasks; i++)
 	{
-		unsigned long long PeriodLength = Periods[0]->length * 1000000;
+		long long int PeriodLength = Periods[0]->length * 1000000;
 
 		CurrentPeriod[i] = 0;
 
@@ -94,15 +95,16 @@ void Process::processCommunicator (string &c)
 	traceout << "c" << c << endl;
 }
 
-#define ITERATION_MARK_TYPE 666001
-#define ITERATION_MARK_VALUE     1
+#define ITERATION_MARK_TYPE_FIT 666001
+#define ITERATION_MARK_TYPE_RAW 666002
+#define ITERATION_MARK_VALUE         1
 
 void Process::processState (struct state_t &s)
 {
 	int                Rank         = s.ObjectID.task - 1;
 	unsigned long long StateIni     = s.Begin_Timestamp;
 	unsigned long long StateEnd     = s.End_Timestamp;
-	unsigned long long PeriodLength = Periods[ CurrentPeriod[Rank] ]->length * 1000000;
+	long long int      PeriodLength = Periods[ CurrentPeriod[Rank] ]->length * 1000000;
 
 	traceout << "1:"
  		 << s.ObjectID.cpu << ":" << s.ObjectID.ptask << ":" << s.ObjectID.task << ":" << s.ObjectID.thread << ":"
@@ -114,7 +116,12 @@ void Process::processState (struct state_t &s)
 
 	  traceout << "2:"
                    << s.ObjectID.cpu << ":" << s.ObjectID.ptask << ":" << s.ObjectID.task << ":" << s.ObjectID.thread << ":"
-		   << s.Begin_Timestamp << ":" << ITERATION_MARK_TYPE << ":" << value << endl;
+		   << s.Begin_Timestamp << ":" << ITERATION_MARK_TYPE_FIT << ":" << value << endl;
+
+	  traceout << "2:"
+                   << s.ObjectID.cpu << ":" << s.ObjectID.ptask << ":" << s.ObjectID.task << ":" << s.ObjectID.thread << ":"
+		   << CurrentIterTime[Rank] << ":" << ITERATION_MARK_TYPE_RAW << ":" << value << endl;
+
 	  CurrentIterTime[Rank] += PeriodLength;
 	}
 	

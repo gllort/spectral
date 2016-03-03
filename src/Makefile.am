@@ -13,7 +13,7 @@ libspectral_la_SOURCES  = \
   dilation.c            dilation.h             \
   erosion.c             erosion.h              \
   cutter_2.7.c          trace_filter_OMP.1.2.c \
-  trace2trace.h                                
+  trace2trace.h         optim-macros.h
 
 libspectral_la_CFLAGS   = -I$(FFT_INCLUDES) 
 libspectral_la_LDFLAGS  = -L$(FFT_LIBSDIR) $(FFT_LIBS) -lz 
@@ -31,7 +31,7 @@ if HAVE_OPENMP
 libspectral_la_CFLAGS   += $(OPENMP_CFLAGS)
 endif
 
-bin_PROGRAMS = trace-analysis signal-analysis compare-signals
+bin_PROGRAMS = trace-analysis signal-analysis csv-analysis compare-signals
 
 trace_analysis_SOURCES = \
   optim-main.cpp
@@ -47,6 +47,16 @@ endif
 signal_analysis_SOURCES = \
   signal-analysis.c
 signal_analysis_LDADD   = libspectral.la
+
+csv_analysis_SOURCES = \
+  csv-analysis.c
+if HAVE_LIBTOOLS
+csv_analysis_SOURCES += \
+  reconstruct_trace.cpp reconstruct_trace.h
+csv_analysis_CXXFLAGS = `@PRVPARSER_CONFIG@ --cflags`
+csv_analysis_LDFLAGS = `@PRVPARSER_CONFIG@ --libs`
+endif
+csv_analysis_LDADD   = libspectral.la
 
 compare_signals_SOURCES = \
   compare-signals.c
