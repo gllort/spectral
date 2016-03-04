@@ -62,5 +62,5 @@ compare_signals_SOURCES = \
   compare-signals.c
 compare_signals_LDADD   = libspectral.la
 
-bin_SCRIPTS = plot-signal
+dist_bin_SCRIPTS = plot-signal
 
